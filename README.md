@@ -1,5 +1,7 @@
 # E-commerce Website with the personalised recommendations and real-time analytics: AWS CDK
 
+![alt text](e-Commerce_Website_Architecture_clean.drawio.png)
+
 This project implements a scalable e-commerce analytics platform using AWS CDK. It processes clickstream data, handles order processing, and provides infrastructure for data analysis and personalization.
 
 The platform leverages various AWS services to create a robust and scalable architecture for handling e-commerce data. It includes components for data ingestion, processing, storage, and analysis, enabling businesses to gain insights from customer interactions and optimize their e-commerce operations.
