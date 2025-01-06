@@ -1,4 +1,4 @@
-# E-commerce Website with AWS CDK
+# E-commerce Website with the personalised recommendations and real-time analytics: AWS CDK
 
 This project implements a scalable e-commerce analytics platform using AWS CDK. It processes clickstream data, handles order processing, and provides infrastructure for data analysis and personalization.
 
