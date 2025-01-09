@@ -4,6 +4,8 @@ cdk/*.d.ts
 cdk/node_modules
 cdk/test
 
+*.bkp
+
 # CDK asset staging directory
 cdk/.cdk.staging
 cdk/cdk.out
@@ -20,3 +22,7 @@ support/
 
 *.drawio-old*
 
+cdk/
+
+
+*drawio*.pdf
