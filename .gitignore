@@ -22,7 +22,11 @@ support/
 
 *.drawio-old*
 
-cdk/
+cdk_typescript/
 
 
 *drawio*.pdf
+
+
+README2.md
+README2Copy.md

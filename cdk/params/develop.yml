@@ -1,0 +1,7 @@
+accountID: "changeme"
+region: "us-east-1"
+personalize:
+  dataLocation: "s3://changeme/interactions-metadata.csv"
+  ItemDataLocation: "s3://changeme/item-metadata.csv"
+  recipeArn: "arn:aws:personalize:::recipe/aws-user-personalization"
+  bucketName: "changeme"

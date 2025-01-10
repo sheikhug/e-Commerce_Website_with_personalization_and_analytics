@@ -1,0 +1,284 @@
+{
+	"info": {
+		"_postman_id": "de27ffd3-17c7-48b3-9457-231a67a66c28",
+		"name": "Near real time recommendations - Blog",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "27993457"
+	},
+	"item": [
+		{
+			"name": "deleteResources Copy",
+			"request": {
+				"method": "DELETE",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"campaignArn\" : \"arn:aws:personalize:{{region}}:{{accountId}}:campaign/{{youtCampaignName}}\",\n    \"eventTrackerArn\": \"arn:aws:personalize:{{region}}:{{accountId}}:event-tracker/{id}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}..amazonaws.com/prod/deleteResources",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"deleteResources"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DescribeSolutionVersion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"solutionVersionArn\": \"arn:aws:personalize:{{region}}:{{accountId}}:solution/my-sol-from-cdk/{{yourSolutionVersion}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/describeSolutionVersion",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"describeSolutionVersion"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "DescribeCampaign",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"campaignArn\": \"arn:aws:personalize:{{region}}:{{accountId}}:campaign/{{youtCampaignName}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/describeCampaign",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"describeCampaign"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateEventTracker",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"name\" : \"my-event-tracker\",\n    \"datasetGroupArn\": \"arn:aws:personalize:{{region}}:{{accountId}}:dataset-group/{{datasetName}}\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/eventTracker",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"eventTracker"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateSolutionVersion",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"solutionArn\" : \"arn:aws:personalize:us-east-1:{{region}}:solution/{{solutionName}}\",\n    \"version\": \"v1\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/solutionVersion",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"solutionVersion"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "PutEvents Kinesis",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"stream-name\": \"{{your-streamName}}\",\n    \"Data\": {\n        \"userId\" : \"242\",\n        \"interactions\": 3,\n        \"itemId\": \"185\",\n        \"trackingId\" : \"{{your-trackingId}}\",\n        \"eventType\": \"click\",\n        \"dateFrom\" : \"2022-01-01\",\n        \"dateTo\" : \"2023-04-05\"    \n    },\n    \"PartitionKey\": \"3\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/data",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"data"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "CreateCampaign",
+			"request": {
+				"method": "POST",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n    \"solutionVersionArn\" : \"arn:aws:personalize:{{region}}:{{accountId}}:solution/{{solutionName}}/v1\",\n    \"name\": \"my-campaign\"\n}",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/campaign",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"campaign"
+					]
+				}
+			},
+			"response": []
+		},
+		{
+			"name": "getRecommendations",
+			"protocolProfileBehavior": {
+				"disableBodyPruning": true
+			},
+			"request": {
+				"method": "GET",
+				"header": [],
+				"body": {
+					"mode": "raw",
+					"raw": "",
+					"options": {
+						"raw": {
+							"language": "json"
+						}
+					}
+				},
+				"url": {
+					"raw": "https://{{ApiId}}.execute-api.{{region}}.amazonaws.com/prod/getRecommendations?campaignArn=arn:aws:personalize:{{region}}:{{accountId}}:campaign/my-solution&userId=429&numResults=20",
+					"protocol": "https",
+					"host": [
+						"{{ApiId}}",
+						"execute-api",
+						"{{region}}",
+						"amazonaws",
+						"com"
+					],
+					"path": [
+						"prod",
+						"getRecommendations"
+					],
+					"query": [
+						{
+							"key": "campaignArn",
+							"value": "arn:aws:personalize:{{region}}:{{accountId}}:campaign/my-solution"
+						},
+						{
+							"key": "userId",
+							"value": "429"
+						},
+						{
+							"key": "numResults",
+							"value": "20"
+						}
+					]
+				}
+			},
+			"response": []
+		}
+	]
+}

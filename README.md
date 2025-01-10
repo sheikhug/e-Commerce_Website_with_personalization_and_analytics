@@ -1,4 +1,4 @@
-# E-commerce Website with the personalised recommendations and real-time analytics: AWS CDK
+# E-commerce Website with the personalized recommendations and real-time analytics: AWS CDK
 
 ![alt text](e-Commerce_Website_Architecture_clean.drawio.png)
 
