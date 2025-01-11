@@ -39,19 +39,18 @@ import { dirname } from 'path';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = dirname(__filename);
 
-
+const region = '024848486969';
 
 
 const createPresentationLayer = (scope, entry, props) => {
 
-    const region = new CfnParameter(scope, 'solutionRegion', {
-        type: 'String',
-        description: 'Region where the solution is deployed',
-    });
+    // const region = new CfnParameter(scope, 'solutionRegion', {
+    //     type: 'String',
+    //     description: 'Region where the solution is deployed',
+    // });
 
     const api = new RestApi(scope, 'PersonalizeApiGateway', {
         restApiName: 'amazon-personalize-presentation-layer',
-
     });
 
     const createCampaign = new NodejsFunction(scope, 'personalizeLambda-createCampaign', {

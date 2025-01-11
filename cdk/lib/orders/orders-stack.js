@@ -11,16 +11,23 @@ const origins = require('aws-cdk-lib/aws-cloudfront-origins');
 const cognito = require('aws-cdk-lib/aws-cognito');
 const apigateway = require('aws-cdk-lib/aws-apigateway');
 const kinesis = require('aws-cdk-lib/aws-kinesis');
-const redshift = require('aws-cdk-lib/aws-redshift');
+// const redshift = require('aws-cdk-lib/aws-redshift');
+const redshift = require('@aws-cdk/aws-redshift-alpha');
 const opensearch = require('aws-cdk-lib/aws-opensearchservice');
 const quicksight = require('aws-cdk-lib/aws-quicksight');
 const ssm = require('aws-cdk-lib/aws-ssm');
-// const sfn = require('aws-cdk-lib/aws-stepfunctions');
-
+const ec2 = require('aws-cdk-lib/aws-ec2');
 
 class OrdersStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
+
+
+    // Get the account ID and region
+    const accountId = Stack.of(this).account;
+    const region = Stack.of(this).region;
+    // const accountId = '024848486969';
+    // const region = 'us-east-1'
 
     // Create DynamoDB table with stream enabled
     const ordersTable = new dynamodb.Table(this, 'OrdersTable', {
@@ -101,171 +108,14 @@ class OrdersStack extends Stack {
     // Create Step Functions states
     const processOrder = new stepfunctions.Pass(this, 'ProcessOrder');
 
-    // const processOrder = new tasks.LambdaInvoke(this, 'ProcessOrderTask', {
+    const processPayment = new stepfunctions.Pass(this, 'ProcessPaymentTask');
+
+    // const processPayment = new tasks.LambdaInvoke(this, 'ProcessPaymentTask', {
     //     lambdaFunction: orderProcessorLambda,
+    //     comment: 'Process the order',
     //   });
 
-    const processPayment = new tasks.LambdaInvoke(this, 'ProcessPaymentTask', {
-        lambdaFunction: orderProcessorLambda,
-        comment: 'Process the order',
-      });
-
     const shipOrder = new stepfunctions.Pass(this, 'ShipOrder');
-
-
-    // const sendSuccessEmail = new tasks.CallAwsService(this, 'SendOrderSuccessEmail', {
-    //   service: 'ses',
-    //   action: 'sendEmail',
-    //   iamResources: ['*'],  // You might want to restrict this
-    //   parameters: {
-    //     Source: 'your-verified-email@example.com',  // Replace with your verified email
-    //     Destination: {
-    //       ToAddresses: [stepfunctions.JsonPath.stringAt('$.customerEmail')]  // Get email from input
-    //     },
-    //     Message: {
-    //       Subject: {
-    //         Data: 'Order Processing Success'
-    //       },
-    //       Body: {
-    //         Text: {
-    //           Data: 'Your order processed successfully.'  // Get message from input
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
-
-    // const sendFailureEmail = new tasks.CallAwsService(this, 'SendOrderFailureEmail', {
-    //   service: 'ses',
-    //   action: 'sendEmail',
-    //   iamResources: ['*'],  // You might want to restrict this
-    //   parameters: {
-    //     Source: 'your-verified-email@example.com',  // Replace with your verified email
-    //     Destination: {
-    //       ToAddresses: [stepfunctions.JsonPath.stringAt('$.customerEmail')]  // Get email from input
-    //     },
-    //     Message: {
-    //       Subject: {
-    //         Data: 'Order Processing Failed'
-    //       },
-    //       Body: {
-    //         Text: {
-    //           Data: 'Your order processing failed.'  // Get message from input
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
-
-
-
-
-    // const sendSuccessEmailTask = new tasks.CallAwsService(this, 'SendSuccessEmail', {
-    //   service: 'ses',
-    //   action: 'sendEmail',
-    //   iamResources: ['*'],
-    //   parameters: {
-    //     Source: 'your-verified-email@example.com',
-    //     Destination: {
-    //       ToAddresses: [stepfunctions.JsonPath.stringAt('$.customerEmail')]
-    //     },
-    //     Message: {
-    //       Subject: {
-    //         Data: 'Order Successfully Processed'
-    //       },
-    //       Body: {
-    //         Text: {
-    //           Data: stepfunctions.JsonPath.format(
-    //             'Your order #{} has been successfully processed.',
-    //             stepfunctions.JsonPath.stringAt('$.orderId')
-    //           )
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
-
-    // const sendFailureEmailTask = new tasks.CallAwsService(this, 'SendFailureEmail', {
-    //   service: 'ses',
-    //   action: 'sendEmail',
-    //   iamResources: ['*'],
-    //   parameters: {
-    //     Source: 'your-verified-email@example.com',
-    //     Destination: {
-    //       ToAddresses: [stepfunctions.JsonPath.stringAt('$.customerEmail')]
-    //     },
-    //     Message: {
-    //       Subject: {
-    //         Data: 'Order Processing Failed'
-    //       },
-    //       Body: {
-    //         Text: {
-    //           Data: stepfunctions.JsonPath.format(
-    //             'We encountered an issue processing your order #{}.',
-    //             stepfunctions.JsonPath.stringAt('$.orderId')
-    //           )
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
-
-
-    // const sendShipmentEmail = new tasks.CallAwsService(this, 'SendShipmentEmail', {
-    //   service: 'ses',
-    //   action: 'sendEmail',
-    //   iamResources: ['*'],  // You might want to restrict this
-    //   parameters: {
-    //     Source: 'your-verified-email@example.com',  // Replace with your verified email
-    //     Destination: {
-    //       ToAddresses: [stepfunctions.JsonPath.stringAt('$.customerEmail')]  // Get email from input
-    //     },
-    //     Message: {
-    //       Subject: {
-    //         Data: 'Order Shipped.'
-    //       },
-    //       Body: {
-    //         Text: {
-    //           Data: 'Your order has been shipped.'  // Get message from input
-    //         }
-    //       }
-    //     }
-    //   }
-    // });
-
-
-
-    // // Create Success and Failure final states
-    // const successState = new stepfunctions.Succeed(this, 'OrderProcessingSucceeded');
-    // const failureState = new stepfunctions.Fail(this, 'OrderProcessingFailed', {
-    //   cause: 'Order Processing Failed',
-    //   error: 'OrderProcessingError'
-    // });
-
-    // // Chain the email tasks with final states
-    // const successPath = sendSuccessEmailTask.next(successState);
-    // const failurePath = sendFailureEmailTask.next(failureState);
-
-
- 
-
-
-    // // Create the Choice state
-    // const paymentChoice = new stepfunctions.Choice(this, 'PaymentSuccessful?')
-    //   .when(stepfunctions.Condition.stringEquals('$.paymentStatus', 'SUCCESS'), successPath)
-    //   .otherwise(failurePath);
-
-    // // // Define the main workflow
-    // // const definition = stepfunctions.Chain
-    // //   .start(paymentChoice);
-
-
-    // const definition = processOrder
-    //   .next(processPayment)
-    //   .next(paymentChoice)
- 
-
-    // lib/orders/orders-stack.js
     
     const sendSuccessEmailTask = new tasks.CallAwsService(this, 'SendSuccessEmail', {
         service: 'ses',
@@ -348,28 +198,34 @@ class OrdersStack extends Stack {
         }
     });
     
-    // Create Success and Failure final states
-    const successState = new stepfunctions.Succeed(this, 'OrderProcessingSucceeded');
-    const failureState = new stepfunctions.Fail(this, 'OrderProcessingFailed', {
-        cause: 'Payment Processing Failed',
-        error: 'PaymentProcessingError'
-    });
+    // // Create Success and Failure final states
+    // const successState = new stepfunctions.Succeed(this, 'OrderProcessingSucceeded');
+    // const failureState = new stepfunctions.Fail(this, 'OrderProcessingFailed', {
+    //     cause: 'Payment Processing Failed',
+    //     error: 'PaymentProcessingError'
+    // });
     
 
-    const successPath = shipOrder
-        .next(sendShipmentEmail)
-        .next(successState);
+    // const successPath = shipOrder
+    //     .next(sendShipmentEmail)
+    //     .next(successState);
     
-    // Create the Choice state with proper paths
-    const paymentChoice = new stepfunctions.Choice(this, 'PaymentSuccessful?')
-        .when(stepfunctions.Condition.stringEquals('$.paymentStatus', 'SUCCESS'), successPath)
-        .otherwise(failureState);
+    // // Create the Choice state with proper paths
+    // const paymentChoice = new stepfunctions.Choice(this, 'PaymentSuccessful?')
+    //     .when(stepfunctions.Condition.stringEquals('$.paymentStatus', 'SUCCESS'), successPath)
+    //     .otherwise(failureState);
     
-    // Define the main workflow
+    // // Define the main workflow
+    // const definition = processOrder
+    //     .next(processPayment)
+    //     .next(paymentChoice);
+
+
     const definition = processOrder
-        .next(processPayment)
-        .next(paymentChoice);
-    
+      .next(processPayment)
+      .next(sendSuccessEmailTask)
+      .next(shipOrder)
+      .next(sendShipmentEmail);
 
 
     // Create the state machine
@@ -407,19 +263,82 @@ class OrdersStack extends Stack {
     );
 
 
-    // Create Redshift cluster
+
+
+
+
+
+    const vpc = new ec2.Vpc(this, 'RedshiftVPC', {
+      maxAzs: 2,
+      natGateways: 1,
+      subnetConfiguration: [
+        {
+          cidrMask: 24,
+          name: 'Private',
+          subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+        },
+        {
+          cidrMask: 24,
+          name: 'Public',
+          subnetType: ec2.SubnetType.PUBLIC,
+        }
+      ]
+    });
+
+    const redshiftSG = new ec2.SecurityGroup(this, 'RedshiftSecurityGroup', {
+      vpc,
+      description: 'Security group for Redshift cluster',
+      allowAllOutbound: true
+    });
+
     const redshiftCluster = new redshift.Cluster(this, 'AnalyticsCluster', {
-      masterUser: {
-        masterUsername: 'admin',
+      vpc,
+      vpcSubnets: {
+        subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS
       },
-      nodeType: redshift.NodeType.DC2_LARGE,
+      securityGroups: [redshiftSG],
+      masterUser: {
+        masterUsername: 'admin'
+      },
+      nodeType: redshift.NodeType.RA3_XLPLUS4,
       clusterType: redshift.ClusterType.SINGLE_NODE,
       defaultDatabaseName: 'ordersdb',
       removalPolicy: RemovalPolicy.DESTROY,
+      publiclyAccessible: false,
+      encrypted: true
     });
 
-    // Grant necessary permissions for QuickSight integration
-    redshiftCluster.grantConnect('quicksight-role');
+
+
+    const quickSightRole = new iam.Role(this, 'QuickSightRedshiftRole', {
+      assumedBy: new iam.ServicePrincipal('quicksight.amazonaws.com'),
+      roleName: 'quicksight-redshift-role',
+      description: 'Role for QuickSight to access Redshift'
+    });
+
+    // Create policy for QuickSight access to Redshift
+    const redshiftAccessPolicy = new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'redshift:GetClusterCredentials',
+        'redshift:DescribeClusters',
+        'redshift:Connect'
+      ],
+      resources: [
+        `arn:aws:redshift:${region}:${accountId}:cluster:${redshiftCluster.clusterName}`,
+        `arn:aws:redshift:${region}:${accountId}:dbuser:${redshiftCluster.clusterName}/*`,
+        `arn:aws:redshift:${region}:${accountId}:dbname:${redshiftCluster.clusterName}/*`,
+        `arn:aws:redshift:${region}:${accountId}:dbgroup:${redshiftCluster.clusterName}/*`
+      ]
+    });
+
+    quickSightRole.addToPolicy(redshiftAccessPolicy);
+
+
+
+    //     // // Grant QuickSight service principal access to Redshift
+    const quickSightPrincipal = new iam.ServicePrincipal('quicksight.amazonaws.com');
+
 
     // Create API Gateway
     const api = new apigateway.RestApi(this, 'OrdersApi', {
@@ -432,7 +351,10 @@ class OrdersStack extends Stack {
     // Add Cognito Authorizer
     const auth = new apigateway.CognitoUserPoolsAuthorizer(this, 'OrdersAuthorizer', {
       cognitoUserPools: [userPool],
+      restApi: api 
     });
+
+
 
     // Create API Gateway resource and method
     const orders = api.root.addResource('orders');
@@ -440,11 +362,6 @@ class OrdersStack extends Stack {
       authorizer: auth,
       authorizationType: apigateway.AuthorizationType.COGNITO,
     });
-
-    // Grant permissions for QuickSight to access Redshift
-    const quickSightPrincipal = new iam.ServicePrincipal('quicksight.amazonaws.com');
-    redshiftCluster.grantConnect(quickSightPrincipal);
-
 
 
 
@@ -455,7 +372,10 @@ class OrdersStack extends Stack {
 
     firehoseRole.addToPolicy(new iam.PolicyStatement({
       actions: ['redshift:GetClusterCredentials'],
-      resources: [redshiftCluster.clusterArn],
+      resources: [
+        `arn:aws:redshift:${region}:${accountId}:cluster:${redshiftCluster.clusterIdentifier}`,
+        `arn:aws:redshift:${region}:${accountId}:dbuser:${redshiftCluster.clusterIdentifier}/*`
+      ],
     }));
 
     // Grant the Kinesis stream permissions to write to Redshift
@@ -463,9 +383,11 @@ class OrdersStack extends Stack {
 
 
 
-    // Create QuickSight data source for Redshift
+
+
+    // Create QuickSight data source
     new quicksight.CfnDataSource(this, 'OrdersRedshiftDataSource', {
-      awsAccountId: props.env.account,
+      awsAccountId: Stack.of(this).account,
       dataSourceId: 'orders-redshift-source',
       name: 'Orders Redshift Source',
       type: 'REDSHIFT',
@@ -477,7 +399,7 @@ class OrdersStack extends Stack {
         }
       },
       permissions: [{
-        principal: quickSightPrincipal.policyFragment.principalJson,
+        principal: quickSightRole.roleArn,
         actions: [
           'quicksight:DescribeDataSource',
           'quicksight:DescribeDataSourcePermissions',
@@ -488,6 +410,9 @@ class OrdersStack extends Stack {
       }]
     });
 
+    // Export cluster information if needed
+    this.clusterEndpoint = redshiftCluster.clusterEndpoint;
+    this.clusterName = redshiftCluster.clusterName;
 
 
     
@@ -547,11 +472,11 @@ class OrdersStack extends Stack {
 
         
     // Grant QuickSight access to OpenSearch
-    openSearchDomain.grantReadWrite(quickSightPrincipal);
+    openSearchDomain.grantReadWrite(quickSightRole);
     
     // Create QuickSight data source for OpenSearch (Note: Additional QuickSight setup required in console)
     new quicksight.CfnDataSource(this, 'OrdersQuickSightSource', {
-      awsAccountId: props.env.account,
+      awsAccountId: accountId,
       dataSourceId: 'orders-opensearch-source',
       name: 'Orders OpenSearch Source',
       type: 'AMAZON_OPENSEARCH',
@@ -561,7 +486,7 @@ class OrdersStack extends Stack {
         }
       },
       permissions: [{
-        principal: quickSightPrincipal.policyFragment.principalJson,
+        principal: quickSightRole.roleArn,
         actions: [
           'quicksight:DescribeDataSource',
           'quicksight:DescribeDataSourcePermissions',
@@ -573,11 +498,7 @@ class OrdersStack extends Stack {
     });
 
 
-
-
-
-
-
+    
   }
 }
 

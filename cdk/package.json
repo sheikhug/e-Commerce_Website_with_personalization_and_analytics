@@ -20,6 +20,7 @@
     "@aws-cdk/aws-kinesisfirehose-alpha": "^2.175.0-alpha.0",
     "@aws-cdk/aws-kinesisfirehose-destinations-alpha": "^2.175.0-alpha.0",
     "@aws-cdk/aws-lambda-event-sources": "^1.204.0",
+    "@aws-cdk/aws-redshift-alpha": "^2.175.1-alpha.0",
     "@aws-sdk/client-personalize": "^3.726.0",
     "@aws-sdk/client-personalize-events": "^3.726.0",
     "@aws-sdk/client-personalize-runtime": "^3.726.0",
