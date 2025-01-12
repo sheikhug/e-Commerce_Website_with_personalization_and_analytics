@@ -3,7 +3,6 @@ cdk/!jest.config.js
 cdk/*.d.ts
 cdk/node_modules
 cdk/test
-
 *.bkp
 
 # CDK asset staging directory
@@ -11,24 +10,16 @@ cdk/.cdk.staging
 cdk/cdk.out
 
 cdk/lib/emr-scripts/emr-stack.ts
-
 node_modules/
-
-*.drawio
-
 support/
-
-*.drawio
-
-*.drawio-old*
-
 cdk_typescript/
 
-
+*.drawio
 *drawio*.pdf
+*.drawio-old*
 
 
 README2.md
 README2Copy.md
-
 images/
+stepfunctiontasks.txt

@@ -18,6 +18,8 @@ const quicksight = require('aws-cdk-lib/aws-quicksight');
 const ssm = require('aws-cdk-lib/aws-ssm');
 const ec2 = require('aws-cdk-lib/aws-ec2');
 
+
+
 class OrdersStack extends Stack {
   constructor(scope, id, props) {
     super(scope, id, props);
@@ -26,9 +28,7 @@ class OrdersStack extends Stack {
     // Get the account ID and region
     const accountId = Stack.of(this).account;
     const region = Stack.of(this).region;
-    // const accountId = '024848486969';
-    // const region = 'us-east-1'
-
+ 
     // Create DynamoDB table with stream enabled
     const ordersTable = new dynamodb.Table(this, 'OrdersTable', {
       partitionKey: { name: 'orderId', type: dynamodb.AttributeType.STRING },
@@ -105,133 +105,43 @@ class OrdersStack extends Stack {
     // Grant Lambda permissions to read from DynamoDB Stream
     ordersTable.grantStreamRead(orderProcessorLambda);
 
+
+
+
+
+
+
+
+
+
+
     // Create Step Functions states
     const processOrder = new stepfunctions.Pass(this, 'ProcessOrder');
-
     const processPayment = new stepfunctions.Pass(this, 'ProcessPaymentTask');
-
-    // const processPayment = new tasks.LambdaInvoke(this, 'ProcessPaymentTask', {
-    //     lambdaFunction: orderProcessorLambda,
-    //     comment: 'Process the order',
-    //   });
-
     const shipOrder = new stepfunctions.Pass(this, 'ShipOrder');
-    
-    const sendSuccessEmailTask = new tasks.CallAwsService(this, 'SendSuccessEmail', {
-        service: 'ses',
-        action: 'sendEmail',
-        iamResources: ['*'],
-        parameters: {
-            Source: 'your-verified-email@example.com',
-            Destination: {
-                ToAddresses: {
-                    'Fn::JsonToString': stepfunctions.JsonPath.stringAt('$.customerEmail')
-                }
-            },
-            Message: {
-                Subject: {
-                    Data: 'Order Successfully Processed'
-                },
-                Body: {
-                    Text: {
-                        Data: stepfunctions.JsonPath.format(
-                            'Your order #{} has been successfully processed.',
-                            stepfunctions.JsonPath.stringAt('$.orderId')
-                        )
-                    }
-                }
-            }
-        }
-    });
-    
-    const sendFailureEmailTask = new tasks.CallAwsService(this, 'SendFailureEmail', {
-        service: 'ses',
-        action: 'sendEmail',
-        iamResources: ['*'],
-        parameters: {
-            Source: 'your-verified-email@example.com',
-            Destination: {
-                ToAddresses: {
-                    'Fn::JsonToString': stepfunctions.JsonPath.stringAt('$.customerEmail')
-                }
-            },
-            Message: {
-                Subject: {
-                    Data: 'Order Processing Failed'
-                },
-                Body: {
-                    Text: {
-                        Data: stepfunctions.JsonPath.format(
-                            'We encountered an issue processing your order #{}.',
-                            stepfunctions.JsonPath.stringAt('$.orderId')
-                        )
-                    }
-                }
-            }
-        }
-    });
-    
-    const sendShipmentEmail = new tasks.CallAwsService(this, 'SendShipmentEmail', {
-        service: 'ses',
-        action: 'sendEmail',
-        iamResources: ['*'],
-        parameters: {
-            Source: 'your-verified-email@example.com',
-            Destination: {
-                ToAddresses: {
-                    'Fn::JsonToString': stepfunctions.JsonPath.stringAt('$.customerEmail')
-                }
-            },
-            Message: {
-                Subject: {
-                    Data: 'Order Shipped'
-                },
-                Body: {
-                    Text: {
-                        Data: stepfunctions.JsonPath.format(
-                            'Your order #{} has been shipped.',
-                            stepfunctions.JsonPath.stringAt('$.orderId')
-                        )
-                    }
-                }
-            }
-        }
-    });
-    
-    // // Create Success and Failure final states
-    // const successState = new stepfunctions.Succeed(this, 'OrderProcessingSucceeded');
-    // const failureState = new stepfunctions.Fail(this, 'OrderProcessingFailed', {
-    //     cause: 'Payment Processing Failed',
-    //     error: 'PaymentProcessingError'
-    // });
-    
+    const sendSuccessEmailTask2 = new stepfunctions.Pass(this, 'SendSuccessEmail2');
+    const sendShipmentEmail2 = new stepfunctions.Pass(this, 'ShipOrder2');
 
-    // const successPath = shipOrder
-    //     .next(sendShipmentEmail)
-    //     .next(successState);
-    
-    // // Create the Choice state with proper paths
-    // const paymentChoice = new stepfunctions.Choice(this, 'PaymentSuccessful?')
-    //     .when(stepfunctions.Condition.stringEquals('$.paymentStatus', 'SUCCESS'), successPath)
-    //     .otherwise(failureState);
-    
-    // // Define the main workflow
-    // const definition = processOrder
-    //     .next(processPayment)
-    //     .next(paymentChoice);
+
+
+
 
 
     const definition = processOrder
       .next(processPayment)
-      .next(sendSuccessEmailTask)
+      .next(sendSuccessEmailTask2)
       .next(shipOrder)
-      .next(sendShipmentEmail);
+      .next(sendShipmentEmail2);
+
+
+
 
 
     // Create the state machine
     const stateMachine = new stepfunctions.StateMachine(this, 'OrderProcessingStateMachine', {
-      definition,
-      timeout: Duration.minutes(5)
+      definitionBody: stepfunctions.DefinitionBody.fromChainable(definition),
+      // definition,
+      timeout: Duration.minutes(5),
     });
 
     // Add necessary IAM permissions
@@ -242,6 +152,10 @@ class OrdersStack extends Stack {
     }));
 
     
+
+
+
+
 
 
 
@@ -261,6 +175,14 @@ class OrdersStack extends Stack {
     const kinesisStream = kinesis.Stream.fromStreamArn(this, 'ImportedStream',
       streamArn 
     );
+
+
+
+
+
+
+
+
 
 
 
@@ -291,6 +213,7 @@ class OrdersStack extends Stack {
       allowAllOutbound: true
     });
 
+    
     const redshiftCluster = new redshift.Cluster(this, 'AnalyticsCluster', {
       vpc,
       vpcSubnets: {
@@ -385,30 +308,30 @@ class OrdersStack extends Stack {
 
 
 
-    // Create QuickSight data source
-    new quicksight.CfnDataSource(this, 'OrdersRedshiftDataSource', {
-      awsAccountId: Stack.of(this).account,
-      dataSourceId: 'orders-redshift-source',
-      name: 'Orders Redshift Source',
-      type: 'REDSHIFT',
-      dataSourceParameters: {
-        redshiftParameters: {
-          database: 'ordersdb',
-          host: redshiftCluster.clusterEndpoint.hostname,
-          port: redshiftCluster.clusterEndpoint.port,
-        }
-      },
-      permissions: [{
-        principal: quickSightRole.roleArn,
-        actions: [
-          'quicksight:DescribeDataSource',
-          'quicksight:DescribeDataSourcePermissions',
-          'quicksight:PassDataSource',
-          'quicksight:UpdateDataSource',
-          'quicksight:DeleteDataSource'
-        ]
-      }]
-    });
+    // // Create QuickSight data source
+    // new quicksight.CfnDataSource(this, 'OrdersRedshiftDataSource', {
+    //   awsAccountId: accountId,
+    //   dataSourceId: 'orders-redshift-source',
+    //   name: 'Orders Redshift Source',
+    //   type: 'REDSHIFT',
+    //   dataSourceParameters: {
+    //     redshiftParameters: {
+    //       database: 'ordersdb',
+    //       host: redshiftCluster.clusterEndpoint.hostname,
+    //       port: redshiftCluster.clusterEndpoint.port,
+    //     }
+    //   },
+    //   permissions: [{
+    //     principal: quickSightRole.roleArn,
+    //     actions: [
+    //       'quicksight:DescribeDataSource',
+    //       'quicksight:DescribeDataSourcePermissions',
+    //       'quicksight:PassDataSource',
+    //       'quicksight:UpdateDataSource',
+    //       'quicksight:DeleteDataSource'
+    //     ]
+    //   }]
+    // });
 
     // Export cluster information if needed
     this.clusterEndpoint = redshiftCluster.clusterEndpoint;
@@ -498,7 +421,78 @@ class OrdersStack extends Stack {
     });
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+//  ------------------ QuickSight Stack ------------------------------ //
+
+    const role = new iam.Role(this, 'QuickSightAssumeRole', {
+      assumedBy: new iam.ServicePrincipal('quicksight.amazonaws.com'),
+    });
+    role.addToPolicy(new iam.PolicyStatement({
+      effect: iam.Effect.ALLOW,
+      actions: [
+        'ec2:CreateNetworkInterface',
+        'ec2:ModifyNetworkInterfaceAttribute',
+        'ec2:DeleteNetworkInterface',
+        'ec2:DescribeSubnets',
+        'ec2:DescribeSecurityGroups',
+      ],
+      resources: ['*'], // We have to use '*' for ec2 resources
+    }));
+
+    // quicksight security group
+    const quicksightSg = new ec2.SecurityGroup(this, 'QuickSightSg', {
+      vpc: vpc,
+      description: 'Security group for QuickSight to allow access to the required data sources like Redshift, S3',
+      allowAllOutbound: false,
+    });
+
+    quicksightSg.connections.allowTo(redshiftCluster.connections, ec2.Port.tcp(5439), 'Allow access from QuickSight');
+
+    const natSubnets = vpc.selectSubnets({
+      subnetType: ec2.SubnetType.PRIVATE_WITH_EGRESS,
+    });
+
+    const quicksightVpcConn = new quicksight.CfnVPCConnection(this, 'VPCConnection', {
+      awsAccountId: accountId,
+      roleArn: role.roleArn,
+      name: 'quicksight-vpc-conn', // this is a REQUIRED attribute
+      vpcConnectionId: 'quicksight-vpc-conn', // this is a REQUIRED attribute even though is not from UI
+      subnetIds: natSubnets.subnetIds,
+      securityGroupIds: [quicksightSg.securityGroupId],
+    });
+
+    new quicksight.CfnDataSource(this, 'RedshiftDataSource', {
+      awsAccountId: accountId,
+      name: 'redshift-data-source',
+      type: 'REDSHIFT',
+      dataSourceParameters: {
+        redshiftParameters: {
+          clusterId: redshiftCluster.clusterName, // This property causes cyclic reference error pointing to 'quicksightSg'
+          database: 'default_db',
+        },
+      },
+      vpcConnectionProperties: {
+        vpcConnectionArn: quicksightVpcConn.attrArn,
+      },
+    });
     
+
+
+
+
+
+
   }
 }
 
